@@ -125,6 +125,20 @@ int encrypt_bytes(uint8_t* pSrc, size_t src_len, uint8_t* pDst, size_t dst_len)
     return resp;
 }
 
+// enclaveの中で「データ復号・演算子適用・データ暗号化」を行うコアロジック。
+// UNIX的な意味でのprocessに関することは何もしていない。
+// この関数の呼び出し元がPOSIX Threadをこの関数をエントリとして立ち上げている。
+//
+// 入力データは無限ループにて inQueue から取得している。
+// これが https://arxiv.org/abs/1711.02279 に記載の↓に該当するものと思われる。
+// つまり、enclaveの起動・停止を繰り返すことによるパフォーマンスロスを防ぐため、
+// enclave内処理は常に別スレッドで動作させている。
+//
+// > we implement an exit-less mechanism [43] for communicating with Ops.
+// > In [43], there is always one thread running inside an enclave listening for operator jobs.
+// > The DBMS uses our I/O layer to send jobs and receive replies via a communication queue.
+// > This method greatly improves performance
+// > by avoiding context switch for each call to the operator between trusted and untrusted zones
 int enclaveProcess(void* arg1)
 {
     size_t src_len = 0, src2_len = 0, src3_len = 0, dst_len = 0;
@@ -204,7 +218,7 @@ int enclaveProcess(void* arg1)
                                           ENC_INT32_LENGTH);
                 break;
 
-            case CMD_INT64_CMP:
+            case CMD_INT64_CMP:  // コアロジックへディスパッチ
                 req->resp = enc_int32_cmp(req->buffer,
                                           ENC_INT32_LENGTH,
                                           req->buffer + ENC_INT32_LENGTH,

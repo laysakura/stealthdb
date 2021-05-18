@@ -14,6 +14,7 @@
  * SGX_error, if there was an error during decryption
 */
 
+// enclaveの中で走る演算のコアロジック（の一例）
 int enc_int32_cmp(uint8_t* int1,
                   size_t int1_len,
                   uint8_t* int2,
@@ -45,7 +46,7 @@ int enc_int32_cmp(uint8_t* int1,
               ? 0
               : (src1_decrypted < src2_decrypted) ? -1 : 1;
 
-    memcpy(result, &cmp, res_len);
+    memcpy(result, &cmp, res_len);  // 比較演算の結果程度は暗号化しない模様... ええんか？
 
     memset_s(pSrc1_decrypted, INT32_LENGTH, 0, INT32_LENGTH);
     memset_s(pSrc2_decrypted, INT32_LENGTH, 0, INT32_LENGTH);
@@ -112,7 +113,7 @@ int enc_int32_add(uint8_t* int1,
     if (int2bytearray((int32_t)decint3_int, dec_int3_v, INT32_LENGTH))
         return MEMORY_COPY_ERROR;
 
-    resp = encrypt_bytes(dec_int3_v, INT32_LENGTH, int3, int3_len);
+    resp = encrypt_bytes(dec_int3_v, INT32_LENGTH, int3, int3_len);  // 加算の結果は暗号化
 
     memset_s(dec_int1_v, INT32_LENGTH, 0, INT32_LENGTH);
     memset_s(dec_int2_v, INT32_LENGTH, 0, INT32_LENGTH);

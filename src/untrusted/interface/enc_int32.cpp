@@ -7,7 +7,7 @@ extern bool status;
 
 int enc_int32_sum_bulk(size_t bulk_size, char* arg1, char* res)
 {
-    if (!status)
+    if (!status) // Enclaveの起動を初回だけやるため、グローバル変数で制御
     {
         int resp = initMultithreading();
         resp = loadKey(0);
@@ -15,7 +15,7 @@ int enc_int32_sum_bulk(size_t bulk_size, char* arg1, char* res)
     }
     int current_position = 0, arg_position = 0;
     int resp = ENCLAVE_IS_NOT_RUNNING;
-    request* req = new request;
+    request* req = new request;  // in_queue への入力含む
 
     uint8_t* int2_v = (uint8_t*)malloc(bulk_size * ENC_INT32_LENGTH);
     uint8_t* int3_v = (uint8_t*)malloc(ENC_INT32_LENGTH);
@@ -46,7 +46,7 @@ int enc_int32_sum_bulk(size_t bulk_size, char* arg1, char* res)
     req->is_done = -1;
 
     inQueue->enqueue(req);
-    while (true)
+    while (true)  // このループの中で、enclave内スレッドが（キューから入力を受け取って）結果を書き戻すのを同期的に待つ
     {
         if (req->is_done == -1)
         {
@@ -56,10 +56,10 @@ int enc_int32_sum_bulk(size_t bulk_size, char* arg1, char* res)
         {
             memcpy(int3_v, req->buffer + current_position, ENC_INT32_LENGTH);
             resp = req->resp;
-            if (!ToBase64Fast(
+            if (!ToBase64Fast(  // 演算結果の受け渡しはbase64 enc/dec してるっぽいが何でだろ？バイト列のままじゃいかんのか？
                     (const BYTE*)int3_v, ENC_INT32_LENGTH, res, ENC_INT32_LENGTH_B64))
                 resp = BASE64DECODER_ERROR;
-            spin_unlock(&req->is_done);
+            spin_unlock(&req->is_done);  // spin-lock しているが、「そんなに大量の演算が並列で処理されることもないから無駄は少ない」という見積りなんだと思う
             break;
         }
     }
