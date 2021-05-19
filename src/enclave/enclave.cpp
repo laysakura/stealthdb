@@ -12,6 +12,7 @@ void free_allocated_memory(void* pointer)
     }
 }
 
+// カラムを暗号化するためのマスターキー（enclaveの中で生成し、シーリングしてどこかに保存）
 /* Generate a master key
  @input: uint8_t sealed_key - pointer to sealed master key array
          size_t - length of the array (=
@@ -39,6 +40,7 @@ int generateKeyEnclave(uint8_t* sealed_key, size_t sealedkey_len)
     return resp;
 }
 
+// `int loadKey(int item)` 関数の中で、シーリングされたマスターキーの保存先が `DATA_FILENAME` なるファイルであることが示されている。
 /* Load the master key from sealed data
  *  @input: uint8_t sealed_key - pointer to a sealed data byte array
             size_t - length of the array (=
