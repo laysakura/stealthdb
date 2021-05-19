@@ -38,7 +38,7 @@ int init() // こいつは呼ばれておらず、 initMultithreading() が使�
 void enclaveThread()
 {
     int resp = 0;
-    enclaveProcess(global_eid, &resp, inQueue);
+    enclaveProcess(global_eid, &resp, inQueue);  // ECALL
 }
 int initMultithreading()
 {
