@@ -17,7 +17,7 @@ int launch_enclave(sgx_launch_token_t* token, int* updated)
 {
     sgx_status_t ret = SGX_ERROR_UNEXPECTED;
 
-    ret = sgx_create_enclave(
+    ret = sgx_create_enclave(  // See: https://qiita.com/Cliffford/items/c6c0c696d4cc6d60d515#enclave%E3%81%AE%E8%B5%B7%E5%8B%95
         ENCLAVE_FILENAME, TRUE, token, updated, &global_eid, NULL);
     if (ret != SGX_SUCCESS)
         return ret;
@@ -25,7 +25,7 @@ int launch_enclave(sgx_launch_token_t* token, int* updated)
         return 0;
 }
 
-int init()
+int init() // こいつは呼ばれておらず、 initMultithreading() が使われている
 {
     sgx_launch_token_t token = { 0 };
     int updated = 0;
@@ -38,12 +38,12 @@ int init()
 void enclaveThread()
 {
     int resp = 0;
-    enclaveProcess(global_eid, &resp, inQueue);
+    enclaveProcess(global_eid, &resp, inQueue);  // ECALL
 }
 int initMultithreading()
 {
     sgx_launch_token_t token = { 0 };
-    int updated = 0;
+    int updated = 0;  // この後この変数は省みられてないし、起動トークンは勝手にupdateしてもらう使い方をしている。
     status = true;
     int ans = launch_enclave(&token, &updated);
 

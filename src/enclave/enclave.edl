@@ -13,6 +13,8 @@ enclave {
     trusted {
         public int generateKeyEnclave([out, size = sealedkey_len] uint8_t *sealed_key, size_t sealedkey_len);
         public int loadKeyEnclave ([in, size = len]  uint8_t *key, size_t len);
+
+        /* POSIX Thread から一回だけECALLされる */
         public int enclaveProcess ([user_check]void* inQueue);
     };
 };

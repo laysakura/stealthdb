@@ -118,6 +118,7 @@ LANGUAGE C IMMUTABLE STRICT;
 --AS '$libdir/encdb'
 --LANGUAGE C IMMUTABLE STRICT;
 
+-- Client Proxy が、SQLに現れた通常の整数を勝手にこの型に変換する。
 CREATE TYPE enc_int4 (
     INPUT          = pg_enc_int4_in,
     OUTPUT         = pg_enc_int4_out,
@@ -287,6 +288,7 @@ CREATE AGGREGATE max_simple (enc_int4)
    finalfunc = pg_enc_int4_maxfinal
 );
 
+-- こいつが演算子のオーバーライド的なことをして、 enc_int4 同士の足し算を pg_enc_int4_add にdispatchさせてる。
 CREATE OPERATOR + (
   LEFTARG = enc_int4,
   RIGHTARG = enc_int4,
