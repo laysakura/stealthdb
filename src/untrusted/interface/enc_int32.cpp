@@ -57,6 +57,7 @@ int enc_int32_sum_bulk(size_t bulk_size, char* arg1, char* res)
             memcpy(int3_v, req->buffer + current_position, ENC_INT32_LENGTH);
             resp = req->resp;
             if (!ToBase64Fast(  // 演算結果の受け渡しはbase64 enc/dec してるっぽいが何でだろ？バイト列のままじゃいかんのか？
+                                // → SQLに現れる平文のデータをClient Proxyで暗号化してSQL書き換えるからだ。SQL中にバイト列は載せられぬ
                     (const BYTE*)int3_v, ENC_INT32_LENGTH, res, ENC_INT32_LENGTH_B64))
                 resp = BASE64DECODER_ERROR;
             spin_unlock(&req->is_done);  // spin-lock しているが、「そんなに大量の演算が並列で処理されることもないから無駄は少ない」という見積りなんだと思う
